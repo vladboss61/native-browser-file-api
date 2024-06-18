@@ -1,99 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Document</title>
-  </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
 
-  <style>
-      .save-btn {
-          border-radius: 5%;
-          border: 2px solid black;
-          padding: 5px;
-          width: 100px;
-          text-align: center;
-          cursor: pointer;
-          background-color: #a19292e0;
-      }
-  </style>
+<style>
+    .save-btn {
+        border-radius: 5%;
+        border: 2px solid black;
+        padding: 5px;
+        width: 100px;
+        text-align: center;
+        cursor: pointer;
+        background-color: #a19292e0;
+      margin: 3px;
+    }
 
-  <body>
-      <div class="save-btn" onclick="saverHandler()">Native Saver</div>
-  </body>
+    .file-name-txt {
+      border: 2px solid black;
+      padding: 5px;
+      width: 150px;
+      text-align: center;
+      background-color: #a19292e0;
+      margin: 3px;
+    }
+</style>
 
-  <script>
-  
-      /*Save content to file.*/
-      function saveFile(filename, content, contentType) {
-          try {
-            // Create a Blob containing the file content
-            const blob = new Blob([content], { type: contentType });
-        
-            // Create an <a> element with a download attribute pointing to the Blob
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-        
-            // Append the <a> element to the DOM and click on it programmatically
-            document.body.appendChild(link);
-            link.click();
-        
-            // Clean up: remove the <a> element and revoke the object URL
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-        
-            console.log('File saved successfully!');
-        
-          }
-          catch (error)
-          {
-            console.error('Error saving file:', error);
-          }
-        }
+<body>
+    <div class="save-btn" onclick="saverHandler()">Native Saver</div>
+</body>
+
+<script>
+    function createFileName(filename) {
+      const id = 'file-name-id';
+      const fileNameClass = 'file-name-txt';
       
-      /*Open Dialog with file selection and save selected file's content to new file name `fake-download__${fileData.name}`.*/
-      function saverHandler() {
-  
-          /*File Dialog options.*/
-          const pickerOpts = {
-              types: [
-              {
-                  description: 'Text Files',
-                  accept: {
-                    'text/plain': ['.txt'],
-                    'text/csv': ['.csv'],
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
-                  }
-                }
-              ],
-              excludeAcceptAllOption: true,
-              multiple: false
-            };
-  
-          /*Process file dialog results.*/
-          window.showOpenFilePicker(pickerOpts).then(async (files) => {
-              const [file] = files;
-              console.log(file);
-  
-              const fileData = await file.getFile();
-  
-              console.log(fileData);
-  
-              const reader = new FileReader();
-  
-              reader.onload = () => {
-                  console.log(reader.result);
-                  /*Read all content and save to new file fake-download, imitating file saving.*/
-                  saveFile(`fake-download__${fileData.name}`, reader.result, fileData.type);
-              }
-              reader.error = () => console.log("Error during reading file.");
-  
-              reader.readAsText(fileData);
-          },
-          () => {
-              console.log("Canceled");
-          });
+      const fileNameElement = document.getElementById(id);
+      if (fileNameElement) {
+        fileNameElement.innerText = filename;
+        return;
       }
-  </script>
+
+      const createdFileNameElement = document.createElement('div');
+      createdFileNameElement.classList.add(fileNameClass);
+      createdFileNameElement.id = id;
+      document.body.appendChild(createdFileNameElement);
+    }
+
+    /*Save content to file.*/
+    function saveFile(filename, content, contentType) {
+        try {
+          // Create a Blob containing the file content
+          const blob = new Blob([content], { type: contentType });
+      
+          // Create an <a> element with a download attribute pointing to the Blob
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = filename;
+      
+          // Append the <a> element to the DOM and click on it programmatically
+          document.body.appendChild(link);
+          link.click();
+      
+          // Clean up: remove the <a> element and revoke the object URL
+          document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
+      
+          console.log('File saved successfully!');
+      
+        }
+        catch (error)
+        {
+          console.error('Error saving file:', error);
+        }
+      }
+    
+    /*Open Dialog with file selection and save selected file's content to new file name `fake-download__${fileData.name}`.*/
+    function saverHandler() {
+
+        /*File Dialog options.*/
+        const pickerOpts = {
+            types: [
+            {
+                description: 'Text Files',
+                accept: {
+                  'text/plain': ['.txt'],
+                  'text/csv': ['.csv'],
+                  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+                }
+              }
+            ],
+            excludeAcceptAllOption: true,
+            multiple: false
+          };
+
+        /*Process file dialog results.*/
+        window.showOpenFilePicker(pickerOpts).then(async (files) => {
+            const [file] = files;
+            console.log(file);
+
+            const fileData = await file.getFile();
+
+            console.log(fileData);
+
+            const reader = new FileReader();
+
+            reader.onload = () => {
+                console.log(reader.result);
+                /*Read all content and save to new file fake-download, imitating file saving.*/
+                saveFile(`fake-download__${fileData.name}`, reader.result, fileData.type);
+                createFileName(fileData.name);
+            }
+            reader.error = () => console.log("Error during reading file.");
+
+            reader.readAsText(fileData);
+        },
+        () => {
+            console.log("Canceled");
+        });
+    }
+</script>
 </html>
